@@ -1,0 +1,16 @@
+[project]
+name = "fastapi1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "bcrypt>=4.0.1,<4.1",
+    "fastapi>=0.136.1",
+    "passlib[bcrypt]>=1.7.4",
+    "psycopg2-binary>=2.9.12",
+    "redis>=5.0.0,<6.0.0",
+    "sqlalchemy[asyncio]>=2.0.49",
+    "uvicorn>=0.47.0",
+]

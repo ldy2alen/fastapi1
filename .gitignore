@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv/
+*.egg
+
+# Node
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite
+news-headline-frontend/dist/
+
+# Docker
+docker-compose.override.yml
+
+# uv
+# uv.lock is committed for reproducible builds
