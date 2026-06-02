@@ -8,7 +8,7 @@ asyncpg>=0.31.0
 psycopg2-binary>=2.9.12
 
 # 数据校验
-pydantic>=2.0.0
+pydantic>=2.13.4
 
 # 密码加密（bcrypt）
 passlib[bcrypt]>=1.7.4
