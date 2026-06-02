@@ -48,6 +48,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
       SQL_ECHO: "false"
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      DASHSCOPE_API_ENDPOINT: ${DASHSCOPE_API_ENDPOINT:-https://www.dreamfield.top/v1/chat/completions}
+      DASHSCOPE_MODEL: ${DASHSCOPE_MODEL:-DeepSeek-V4-Flash}
     ports:
       - "8000:8000"
     depends_on:

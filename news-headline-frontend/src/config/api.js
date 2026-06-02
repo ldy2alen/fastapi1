@@ -10,13 +10,3 @@ export const apiConfig = {
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
 }
 
-export const aiChatConfig = {
-  // OpenAI API地址
-  apiEndpoint: import.meta.env.VITE_AI_API_ENDPOINT || 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-
-  // API Key
-  apiKey: import.meta.env.VITE_AI_API_KEY || '',
-
-  // 使用的模型
-  model: import.meta.env.VITE_AI_MODEL || 'qwen3-max-preview'
-}

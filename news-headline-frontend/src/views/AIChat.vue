@@ -51,7 +51,9 @@ import TabBar from '../components/TabBar.vue';
 import { showToast } from 'vant';
 import * as marked from 'marked';
 import DOMPurify from 'dompurify';
-import { aiChatConfig } from '../config/api';
+import { useUserStore } from '../store/user';
+
+const userStore = useUserStore();
 
 // 聊天消息
 const messages = ref([
@@ -60,11 +62,6 @@ const messages = ref([
 const userInput = ref('');
 const messagesContainer = ref(null);
 const isLoading = ref(false);
-
-// 从配置文件获取API设置
-const apiEndpoint = ref(aiChatConfig.apiEndpoint);
-const apiKey = ref(aiChatConfig.apiKey);
-const model = ref(aiChatConfig.model);
 
 // 格式化消息内容（支持Markdown）
 const formatMessage = (content) => {
@@ -77,9 +74,9 @@ const formatMessage = (content) => {
 const sendMessage = async () => {
   if (!userInput.value.trim() || isLoading.value) return;
   
-  // 检查API设置
-  if (!apiKey.value || apiKey.value === 'your-api-key-here') {
-    showToast('API Key未配置，请联系管理员');
+  // 检查登录状态
+  if (!userStore.token) {
+    showToast('请先登录');
     return;
   }
   
@@ -110,75 +107,69 @@ const sendMessage = async () => {
   }
 };
 
-// 获取AI响应（使用SSE）
+// 获取AI响应（通过后端代理，SSE流式）
 const fetchAIResponse = async (userMessage) => {
-  const allMessages = messages.value
-    .slice(0, -1) // 排除最后一个空的assistant消息
+  // 构建历史对话（排除最后一条空的assistant消息）
+  const history = messages.value
+    .slice(0, -1)
     .map(msg => ({ role: msg.role, content: msg.content }));
-  
+
   try {
-    const response = await fetch(apiEndpoint.value, {
+    const response = await fetch('/api/ai/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.value}`,
-        'X-DashScope-SSE': 'enable' // 添加阿里云DashScope所需的SSE头
+        'Authorization': userStore.token,
       },
       body: JSON.stringify({
-        model: model.value,
-        messages: allMessages,
-        stream: true
-      })
+        message: userMessage,
+        history: history,
+      }),
     });
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.error?.message || `HTTP error! status: ${response.status}`);
+      throw new Error(error.message || `请求失败: ${response.status}`);
     }
-    
+
     // 处理SSE流
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     let aiResponse = '';
-  
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-    
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const data = line.slice(6);
-        if (data === '[DONE]') continue;
-        
-        try {
-          const json = JSON.parse(data);
-          // 适配阿里云DashScope的返回格式
-          const content = json.choices?.[0]?.delta?.content || 
-                         json.output?.text || 
-                         json.choices?.[0]?.message?.content || '';
-          if (content) {
-            aiResponse += content;
-            // 更新最后一条消息
-            messages.value[messages.value.length - 1].content = aiResponse;
-            await nextTick();
-            scrollToBottom();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') continue;
+
+          try {
+            const json = JSON.parse(data);
+            const content = json.content || '';
+            if (content) {
+              aiResponse += content;
+              messages.value[messages.value.length - 1].content = aiResponse;
+              await nextTick();
+              scrollToBottom();
+            }
+          } catch (e) {
+            console.error('Error parsing SSE data:', e);
           }
-        } catch (e) {
-          console.error('Error parsing SSE data:', e);
         }
       }
     }
-  }
-  
-  // 如果没有收到任何内容
-  if (!aiResponse) {
-    messages.value[messages.value.length - 1].content = '抱歉，我无法生成回复。请检查API设置或稍后再试。';
-  }
+
+    if (!aiResponse) {
+      messages.value[messages.value.length - 1].content = '抱歉，我无法生成回复，请稍后再试。';
+    }
   } catch (error) {
     console.error('Fetch error:', error);
     throw error;
