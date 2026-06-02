@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  # ========== PostgreSQL 数据库 ==========
+  postgres:
+    image: postgres:15-alpine
+    container_name: news-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zxc123456}
+      POSTGRES_DB: ${POSTGRES_DB:-news_app}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./news-headline-backend/database_pg.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== Redis 缓存 ==========
+  redis:
+    image: redis:7-alpine
+    container_name: news-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========== 后端 FastAPI ==========
+  backend:
+    build:
+      context: ./news-headline-backend
+      dockerfile: Dockerfile
+    container_name: news-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-zxc123456}@postgres:5432/${POSTGRES_DB:-news_app}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      SQL_ECHO: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ========== 前端 Vue + Nginx ==========
+  frontend:
+    build:
+      context: ./news-headline-frontend
+      dockerfile: Dockerfile
+    container_name: news-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:

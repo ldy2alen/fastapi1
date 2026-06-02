@@ -8,9 +8,20 @@ dependencies = [
     "asyncpg>=0.31.0",
     "bcrypt>=4.0.1,<4.1",
     "fastapi>=0.136.1",
+    "httpx>=0.27.0",
     "passlib[bcrypt]>=1.7.4",
     "psycopg2-binary>=2.9.12",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
     "redis>=5.0.0,<6.0.0",
     "sqlalchemy[asyncio]>=2.0.49",
     "uvicorn>=0.47.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["news-headline-backend/tests"]
+markers = [
+    "integration: 需要数据库的集成测试",
 ]
