@@ -39,8 +39,8 @@ services:
   # ========== 后端 FastAPI ==========
   backend:
     build:
-      context: ./news-headline-backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: news-headline-backend/Dockerfile
     container_name: news-backend
     restart: always
     environment:

@@ -11,14 +11,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 安装 uv 包管理器
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
-# 复制依赖文件
+# 复制依赖文件（从根目录）
 COPY pyproject.toml uv.lock ./
 
 # 安装 Python 依赖（不安装开发依赖）
 RUN uv sync --no-dev --no-install-project
 
-# 复制源码
-COPY . .
+# 复制后端源码
+COPY news-headline-backend/ ./
 
 # 暴露端口
 EXPOSE 8000
