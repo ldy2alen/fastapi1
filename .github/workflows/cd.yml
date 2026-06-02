@@ -71,6 +71,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}      # SSH 用户名
           key: ${{ secrets.SERVER_SSH_KEY }}        # SSH 私钥
           port: ${{ secrets.SERVER_PORT || 22 }}    # SSH 端口
+          command_timeout: 30m                     # 镜像拉取慢，加长超时
           script: |
             cd ${{ secrets.DEPLOY_PATH || '~/news-app' }}
 
