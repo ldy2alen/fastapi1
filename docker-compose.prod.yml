@@ -1,0 +1,11 @@
+# 生产环境配置 - 使用 GHCR 镜像
+# 用法: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    build: !reset null
+
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
+    build: !reset null
