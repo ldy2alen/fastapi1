@@ -19,7 +19,7 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # 通过 SSH 连接服务器部署
       - name: 部署到 ECS
