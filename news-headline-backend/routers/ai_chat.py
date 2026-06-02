@@ -79,12 +79,16 @@ async def chat(data: ChatRequest,
                             continue
                         try:
                             json_data = json.loads(data_str)
-                            content = (
-                                json_data.get("choices", [{}])[0].get("delta", {}).get("content")
-                                or json_data.get("output", {}).get("text")
-                                or json_data.get("choices", [{}])[0].get("message", {}).get("content")
-                                or ""
-                            )
+                            choices = json_data.get("choices", [])
+                            content = ""
+                            if choices:
+                                content = (
+                                    choices[0].get("delta", {}).get("content")
+                                    or choices[0].get("message", {}).get("content")
+                                    or ""
+                                )
+                            if not content:
+                                content = json_data.get("output", {}).get("text", "")
                             if content:
                                 ai_response += content
                                 yield f"data: {json.dumps({'content': content})}\n\n"
