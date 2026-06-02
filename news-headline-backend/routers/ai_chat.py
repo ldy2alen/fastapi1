@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import StreamingResponse
 
-from config.db_confing import get_db
+from config.db_confing import get_db, AsyncSessionLocal
 from crud import ai_chat as ai_chat_crud
 from models.users import User
 from schemas.ai_chat import ChatRequest, ChatHistoryResponse, ChatHistoryItem
@@ -87,10 +87,11 @@ async def chat(data: ChatRequest,
                         except json.JSONDecodeError:
                             continue
 
-        # 流结束后保存到数据库
+        # 流结束后保存到数据库（使用独立会话，因为请求会话已关闭）
         if ai_response:
             try:
-                await ai_chat_crud.save_chat(db, user.id, data.message, ai_response)
+                async with AsyncSessionLocal() as save_db:
+                    await ai_chat_crud.save_chat(save_db, user.id, data.message, ai_response)
             except Exception:
                 pass  # 保存失败不影响响应
 
