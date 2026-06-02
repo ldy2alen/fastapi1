@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # 根目录 - uv (Python)
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # 后端子目录 - pip (requirements.txt)
+  - package-ecosystem: "pip"
+    directory: "/news-headline-backend"
+    schedule:
+      interval: "weekly"
+
+  # 前端 - npm
+  - package-ecosystem: "npm"
+    directory: "/news-headline-frontend"
+    schedule:
+      interval: "weekly"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
