@@ -1,6 +1,6 @@
 # Web 框架 & ASGI 服务器
 fastapi>=0.115.0
-uvicorn[standard]>=0.34.0
+uvicorn[standard]>=0.48.0
 
 # 数据库 ORM & 异步 PostgreSQL 驱动
 sqlalchemy>=2.0.0
