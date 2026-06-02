@@ -38,6 +38,10 @@ async def chat(data: ChatRequest,
     # 添加当前用户消息
     messages.append({"role": "user", "content": data.message})
 
+    # 在generator外保存用户ID和消息，避免会话关闭后访问ORM对象
+    user_id = user.id
+    user_message = data.message
+
     async def generate():
         ai_response = ""
 
@@ -91,9 +95,10 @@ async def chat(data: ChatRequest,
         if ai_response:
             try:
                 async with AsyncSessionLocal() as save_db:
-                    await ai_chat_crud.save_chat(save_db, user.id, data.message, ai_response)
-            except Exception:
-                pass  # 保存失败不影响响应
+                    await ai_chat_crud.save_chat(save_db, user_id, user_message, ai_response)
+            except Exception as e:
+                import sys
+                print(f"保存聊天记录失败: {e}", file=sys.stderr)  # 保存失败不影响响应
 
     return StreamingResponse(
         generate(),
