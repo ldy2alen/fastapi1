@@ -12,12 +12,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装 uv 包管理器
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ uv
 
 # 复制依赖文件（从根目录）
 COPY pyproject.toml uv.lock ./
 
-# 安装 Python 依赖（不安装开发依赖）
+# 使用阿里云 PyPI 镜像安装 Python 依赖
+ENV UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/
 RUN uv sync --no-dev --no-install-project
 
 # 复制后端源码
