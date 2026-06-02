@@ -3,9 +3,9 @@
 
 services:
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest
+    image: ghcr.io/ldy2alen/fastapi1/backend:latest
     build: !reset null
 
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY}/frontend:latest
+    image: ghcr.io/ldy2alen/fastapi1/frontend:latest
     build: !reset null
